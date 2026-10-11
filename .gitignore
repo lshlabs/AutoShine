@@ -1,0 +1,26 @@
+**/bin/
+**/obj/
+.vs/
+artifacts/
+*.user
+*.suo
+*.log
+credentials*
+certificate*
+state.json
+settings.local.json
+backups/
+*.pfx
+node_modules/
+src/AutoShine.Web/wwwroot/
+
+releases/
+tools.local.ps1
+docs/LOCAL_ENVIRONMENT.md
+
+# Internal development handoff and local maintenance only
+AGENTS.md
+ONBOARDING.md
+docs/
+scripts/
+update-app.ps1

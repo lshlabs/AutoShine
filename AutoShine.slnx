@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AutoShine.Agent/AutoShine.Agent.csproj" />
+    <Project Path="src/AutoShine.Core/AutoShine.Core.csproj" />
+    <Project Path="src/AutoShine.Sunshine/AutoShine.Sunshine.csproj" />
+    <Project Path="src/AutoShine.Web/AutoShine.Web.csproj" />
+    <Project Path="src/AutoShine.Windows/AutoShine.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AutoShine.IntegrationTests/AutoShine.IntegrationTests.csproj" />
+    <Project Path="tests/AutoShine.Tests/AutoShine.Tests.csproj" />
+  </Folder>
+</Solution>
