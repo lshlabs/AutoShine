@@ -52,6 +52,17 @@ public static class CredentialVault
         try { var credential = Marshal.PtrToStructure<Credential>(pointer); return (credential.UserName ?? "", Marshal.PtrToStringUni(credential.CredentialBlob, (int)credential.CredentialBlobSize / 2) ?? ""); }
         finally { CredFree(pointer); }
     }
+    public static string? ReadUsername(string target)
+    {
+        if (!ExistsExact(target)) {
+            var legacy = LegacyTarget(target);
+            if (legacy is null || !ExistsExact(legacy)) return null;
+            target = legacy;
+        }
+        if (!CredRead(target, 1, 0, out var pointer)) throw new Win32Exception(Marshal.GetLastWin32Error());
+        try { return Marshal.PtrToStructure<Credential>(pointer).UserName ?? ""; }
+        finally { CredFree(pointer); }
+    }
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)] struct Credential
     {
         public uint Flags, Type; public string? TargetName, Comment; public long LastWritten; public uint CredentialBlobSize; public IntPtr CredentialBlob; public uint Persist, AttributeCount; public IntPtr Attributes; public string? TargetAlias, UserName;
