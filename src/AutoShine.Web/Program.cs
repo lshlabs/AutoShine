@@ -152,6 +152,12 @@ app.MapGet("/api/diagnostics", () => {
 });
 app.MapPost("/api/files/pick/{kind}", async (string kind, FilePickerRequest request) => Results.Ok(new { path = await AutoShine.Web.FilePicker.Pick(kind, request.Path) }));
 app.MapPost("/api/sunshine/certificate", async (SunshineSettings settings) => Results.Ok(new { pin = await SunshineQuit.CertificateFingerprint(settings.BasePort) }));
+app.MapPost("/api/sunshine/account", (AccountRequest request) => {
+    if (isolatedPreview) return Results.BadRequest(new { error = "검증 서버에서는 로그인 정보를 표시하지 않습니다." });
+    if (request.Port is < 1024 or > 65514) throw new ArgumentException("Invalid Sunshine port");
+    var credential = CredentialVault.Read("AutoShine/Sunshine/" + request.Port);
+    return Results.Ok(new { username = credential.Username, password = credential.Password });
+});
 app.MapPost("/api/sunshine/unpair", (SunshineSettings settings) => {
     if (settings.BasePort is < 1024 or > 65514) throw new IOException("Sunshine 포트를 확인하세요.");
     CredentialVault.Delete("AutoShine/Sunshine/" + settings.BasePort);
@@ -206,4 +212,5 @@ sealed record FilePickerRequest(string? Path);
 
 sealed record ToolRequest(string Path);
 sealed record StartupRequest(bool Enabled);
+sealed record AccountRequest(int Port);
 

@@ -591,6 +591,7 @@ function SettingsPage(p: PageProps & {setDraft: (c: Config) => void; env: Enviro
   const [busy, setBusy] = useState('');
   const [user,setUser] = useState(p.env.sunshineUsername??''); const [pw,setPw] = useState(''); const [showPassword,setShowPassword] = useState(false);
   const [pin,setPin] = useState(''); const [paired,setPaired] = useState(p.env.paired);
+  useEffect(()=>{if(!paired||p.env.isolatedPreview)return;let active=true;setShowPassword(false);api('sunshine/account',{port:c.backend.sunshine.basePort}).then(r=>{if(active){setUser(r.username);setPw(r.password);}}).catch(e=>{if(active){setResultFor('auth');setResult({h:'error',text:e.message});}});return()=>{active=false;};},[paired,c.backend.sunshine.basePort,p.env.isolatedPreview]);
   const [certificateInput,setCertificateInput] = useState('');
   const certificateMatches = fingerprintMatches(pin,certificateInput);
   const [capture,setCapture] = useState(false);
@@ -622,7 +623,7 @@ function SettingsPage(p: PageProps & {setDraft: (c: Config) => void; env: Enviro
     setPw('');setPin('');setPaired(true);setResult({h:'ok',text:'Sunshine 로그인 연결을 완료했습니다.'});
   });
   const unpair = () => run('unpair',async () => {
-    const r=await api('sunshine/unpair',c.backend.sunshine);setPaired(false);setResult({h:'ok',text:r.message});
+    const r=await api('sunshine/unpair',c.backend.sunshine);setPaired(false);setPw('');setShowPassword(false);setResult({h:'ok',text:r.message});
   });
   const importConfig = async (f: File) => run('import',async () => {
     const raw=JSON.parse(await f.text()); const b: Backend=await api('settings/validate',raw);
@@ -693,7 +694,7 @@ function SettingsPage(p: PageProps & {setDraft: (c: Config) => void; env: Enviro
       <h3 className="flex items-center gap-2 text-sm font-semibold"><span className="flex items-center gap-2">Sunshine 로그인 <span className={`rounded px-2 py-0.5 text-xs font-normal ${paired?'bg-success/15 text-success':'bg-muted text-muted-foreground'}`}>{paired?'로그인 등록됨':'로그인 미등록'}</span></span></h3>
       <p className="mt-1 text-sm text-muted-foreground">종료 단축키로 스트리밍을 종료할 때 사용합니다.</p>
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end"><label className="block text-sm">아이디<input aria-label="Sunshine 아이디" placeholder="Sunshine 아이디" className={field+" mt-1"} readOnly={paired} value={user} onChange={e=>{setUser(e.target.value);setPin('');}} autoComplete="username"/></label><label className="block text-sm">비밀번호<div className="relative mt-1"><input aria-label="Sunshine 비밀번호" placeholder="Sunshine 비밀번호" type={paired?"text":showPassword?"text":"password"} readOnly={paired} className={field+(paired?"":" pr-10")} value={paired?translate("저장된 비밀번호"):pw} onChange={e=>{setPw(e.target.value);setPin('');}} autoComplete={paired?"off":"current-password"}/>{!paired&&<button type="button" aria-label={showPassword?"비밀번호 숨기기":"비밀번호 보기"} aria-pressed={showPassword} onClick={()=>setShowPassword(v=>!v)} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 hover:bg-secondary">{showPassword?<EyeOff className="h-4 w-4"/>:<Eye className="h-4 w-4"/>}</button>}</div></label><Btn onClick={()=>paired?unpair():pair()} disabled={!!busy||(!paired&&(!user||!pw))||p.env.isolatedPreview} tone={paired?"danger":"primary"}>{paired?"로그인 해제":"로그인"}</Btn></div>
+      <div className="mt-3 grid gap-2 sm:grid-cols-[1fr_1fr_auto] sm:items-end"><label className="block text-sm">아이디<input aria-label="Sunshine 아이디" placeholder="Sunshine 아이디" className={field+" mt-1"} readOnly={paired} value={user} onChange={e=>{setUser(e.target.value);setPin('');}} autoComplete="username"/></label><label className="block text-sm">비밀번호<div className="relative mt-1"><input aria-label="Sunshine 비밀번호" placeholder="Sunshine 비밀번호" type={showPassword?"text":"password"} readOnly={paired} className={field+" pr-10"} value={pw} onChange={e=>{setPw(e.target.value);setPin('');}} autoComplete={paired?"off":"current-password"}/><button type="button" aria-label={showPassword?"비밀번호 숨기기":"비밀번호 보기"} aria-pressed={showPassword} onClick={()=>setShowPassword(v=>!v)} className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 hover:bg-secondary">{showPassword?<EyeOff className="h-4 w-4"/>:<Eye className="h-4 w-4"/>}</button></div></label><Btn onClick={()=>paired?unpair():pair()} disabled={!!busy||(!paired&&(!user||!pw))||p.env.isolatedPreview} tone={paired?"danger":"primary"}>{paired?"로그인 해제":"로그인"}</Btn></div>
       {pin && <div className="mt-3 rounded-md border border-border p-3"><p className="text-sm">이 PC의 Sunshine 서버에 처음 연결합니다.</p><details className="mt-2 text-xs"><summary>서버 인증서 정보</summary><p className="break-all font-mono">SHA-256: {pin}</p></details><div className="mt-3 flex gap-2"><Btn onClick={()=>pair(true)} disabled={!!busy||p.env.isolatedPreview}>이 서버로 연결</Btn><Btn onClick={()=>setPin('')}>취소</Btn></div></div>}
       {resultFor==='auth' && <ResultLine r={result} />}
       </div>
