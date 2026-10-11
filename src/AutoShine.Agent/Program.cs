@@ -19,6 +19,7 @@ internal static class Program
     {
         try
         {
+            if (args.FirstOrDefault() == "--remove-machine-startup") { LoginStartup.RemoveMachineEntry(); return; }
             if (args.FirstOrDefault() == "--apply-vdd")
             {
                 var settings = new SettingsStore(Path.Combine(Root, "settings.json")).Load();
@@ -123,8 +124,6 @@ internal sealed class AgentHost : Form
         Program.Log.Write(session is null ? "agent-start-local" : "agent-start-session-journal");
         var menu = new ContextMenuStrip();
         menu.Items.Add("설정 열기", null, (_, _) => Program.OpenWeb());
-        menu.Items.Add("세션 종료", null, async (_, _) => { try { await Execute("quit"); } catch (Exception ex) { MessageBox.Show(ex.Message, "AutoShine"); } });
-        menu.Items.Add("상태 확인", null, (_, _) => MessageBox.Show((session is null ? "로컬 상태" : "원격 세션 유지 중") + (error.Length > 0 ? "\n" + error : ""), "AutoShine"));
         menu.Items.Add("종료", null, (_, _) => { if (session is not null) { MessageBox.Show("원격 세션을 먼저 종료하세요."); return; } Close(); });
         tray = new NotifyIcon { Icon = SystemIcons.Application, Text = "AutoShine", Visible = true, ContextMenuStrip = menu };
         tray.DoubleClick += (_, _) => Program.OpenWeb();

@@ -66,6 +66,17 @@ app.MapPost("/api/vdd/presets", async (VddPresetSettings presets) => {
     return Results.Ok(new { settings = VddPresets.Read(), message = "VDD 설정 파일을 저장했습니다. 드라이버에 반영됐는지 확인하세요." });
 });
 app.MapGet("/api/runtime", () => Results.Ok(new { product = "AutoShine", processId = Environment.ProcessId }));
+app.MapGet("/api/startup", () => Results.Ok(new { enabled = LoginStartup.Enabled() }));
+app.MapPost("/api/startup", async (StartupRequest request) => {
+    if (isolatedPreview) return Results.BadRequest(new { error = "검증 서버에서는 시작프로그램 설정을 변경하지 않습니다." });
+    if (LoginStartup.MachineEnabled()) {
+        using var process = Process.Start(new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory, "AutoShine.exe"), "--remove-machine-startup") { UseShellExecute = true, Verb = "runas" }) ?? throw new IOException("시작프로그램 설정을 변경할 수 없습니다.");
+        await process.WaitForExitAsync();
+        if (process.ExitCode != 0 || LoginStartup.MachineEnabled()) throw new IOException("시작프로그램 설정을 변경할 수 없습니다.");
+    }
+    LoginStartup.SetUser(request.Enabled);
+    return Results.Ok(new { enabled = LoginStartup.Enabled() });
+});
 app.MapGet("/api/agent/status", async () => {
     try {
         using var pipe = new System.IO.Pipes.NamedPipeClientStream(".", "AutoShine-" + System.Security.Principal.WindowsIdentity.GetCurrent().User!.Value, System.IO.Pipes.PipeDirection.InOut, System.IO.Pipes.PipeOptions.Asynchronous);
@@ -194,4 +205,5 @@ sealed record PairRequest(int Port, string Username, string Password, string? Pi
 sealed record FilePickerRequest(string? Path);
 
 sealed record ToolRequest(string Path);
+sealed record StartupRequest(bool Enabled);
 

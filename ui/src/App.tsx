@@ -179,6 +179,17 @@ export default function App() {
 }
 
 /* ---------- status ---------- */
+function LoginStartupSection() {
+  const [enabled,setEnabled]=useState<boolean|null>(null);
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState('');
+  useEffect(()=>{let active=true;api('startup').then(r=>{if(active)setEnabled(r.enabled);}).catch(e=>{if(active)setError(e.message);});return()=>{active=false;};},[]);
+  const toggle=async()=>{setBusy(true);setError('');try{const r=await api('startup',{enabled:!enabled});setEnabled(r.enabled);}catch(e){setError((e as Error).message);}finally{setBusy(false);}};
+  return <Section title="시작프로그램" desc="Windows 로그인 시 AutoShine을 실행합니다. 변경 즉시 적용됩니다.">
+    <div className="flex items-center justify-between gap-3 rounded-md border border-border p-4"><span className="text-sm">로그인 시 자동 실행</span><button type="button" role="switch" aria-label="로그인 시 자동 실행" aria-checked={enabled===true} disabled={busy||enabled===null} onClick={toggle} className={`relative h-6 w-11 shrink-0 rounded-full disabled:opacity-50 ${enabled?'bg-primary':'bg-muted'}`}><span className={`absolute top-0.5 h-5 w-5 rounded-full bg-foreground ${enabled?'left-5.5':'left-0.5'}`}/></button></div>
+    {error&&<p role="alert" className="mt-3 text-sm text-destructive">{error}</p>}
+  </Section>;
+}
 function HealthIcon({ h, className = "h-4 w-4" }: { h: Health; className?: string }) {
   if (h === "ok") return <CheckCircle2 className={`${className} text-success`} />;
   if (h === "warn") return <AlertTriangle className={`${className} text-warning`} />;
@@ -681,6 +692,7 @@ function SettingsPage(p: PageProps & {setDraft: (c: Config) => void; env: Enviro
       {resultFor==='auth' && <ResultLine r={result} />}
       </div>
     </Section>
+    <LoginStartupSection/>
     <Section title="스트리밍 종료 단축키" desc="이 PC의 키보드로 Moonlight 스트리밍을 종료합니다. 사용하려면 Sunshine 연동 카드에서 로그인하세요." dirty={c.hotkeyEnabled!==a.hotkeyEnabled||c.hotkey!==a.hotkey}>
       <div className="flex items-center justify-between rounded-md border border-border px-4 py-3"><span className="flex items-center gap-2 text-sm"><Keyboard className="h-4 w-4"/>단축키 사용</span><button role="switch" aria-label="단축키 사용" aria-checked={c.hotkeyEnabled} onClick={()=>set('hotkeyEnabled',!c.hotkeyEnabled)} className={`relative h-6 w-11 rounded-full ${c.hotkeyEnabled?'bg-primary':'bg-muted'}`}><span className={`absolute top-0.5 h-5 w-5 rounded-full bg-foreground ${c.hotkeyEnabled?'left-5.5':'left-0.5'}`}/></button></div>
       {c.hotkeyEnabled&&<div className="mt-4"><div className="flex flex-wrap gap-2"><button aria-label="단축키 키 조합 입력" onClick={()=>setCapture(true)} onKeyDown={record} onBlur={()=>setCapture(false)} className={field+' flex-1'}>{capture?'키 조합을 누르세요 · Esc 취소':c.hotkey||'클릭하여 키 조합 지정'}</button><Btn disabled={!!busy} onClick={()=>run('hotkey',async()=>{const r=await api('hotkey/check',hotkeyValue(c.hotkey,true));setResult({h:'ok',text:r.message});})}>단축키 확인</Btn></div></div>}

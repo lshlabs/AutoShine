@@ -1,4 +1,10 @@
 export const completed: Record<string,string> = {
+"검증 서버에서는 시작프로그램 설정을 변경하지 않습니다.":"Startup settings cannot be changed on the preview server.",
+"시작프로그램 설정을 변경할 수 없습니다.":"Unable to change startup settings.",
+"AutoShine 실행 파일을 찾을 수 없습니다.":"The AutoShine executable could not be found.",
+"시작프로그램":"Startup",
+"Windows 로그인 시 AutoShine을 실행합니다. 변경 즉시 적용됩니다.":"Start AutoShine when you sign in to Windows. Changes apply immediately.",
+"로그인 시 자동 실행":"Start at sign-in",
 "메뉴 열기":"Open menu",
 "메뉴 닫기":"Close menu",
 "Sunshine을 다시 시작하면 화면 설정이 반영됩니다.":"Restart Sunshine to apply the display settings.",

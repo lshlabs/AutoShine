@@ -24,7 +24,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop launch button"; Flags: unchecked
-Name: "startup"; Description: "Start the tray Agent when a Windows user signs in"; Flags: unchecked
+Name: "startup"; Description: "Start AutoShine when a Windows user signs in"
 
 [Files]
 Source: "..\artifacts\package\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
@@ -34,7 +34,8 @@ Name: "{group}\AutoShine"; Filename: "{app}\AutoShine.exe"; WorkingDir: "{app}"
 Name: "{autodesktop}\AutoShine"; Filename: "{app}\AutoShine.exe"; WorkingDir: "{app}"; Tasks: desktopicon
 
 [Registry]
-Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "AutoShine"; ValueData: """{app}\AutoShine.exe"" --background"; Flags: uninsdeletevalue; Tasks: startup
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueName: "AutoShine"; Flags: deletevalue
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "AutoShine"; ValueData: """{app}\AutoShine.exe"" --background"; Flags: uninsdeletevalue; Tasks: startup
 
 [Run]
 Filename: "{app}\AutoShine.exe"; Description: "Open AutoShine"; Flags: nowait postinstall skipifsilent runasoriginaluser
