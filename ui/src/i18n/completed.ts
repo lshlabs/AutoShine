@@ -1,4 +1,5 @@
 export const completed: Record<string,string> = {
+"종료 단축키로 스트리밍을 종료할 때 사용합니다.":"Used to end streaming with the keyboard shortcut.",
 "검증 서버에서는 시작프로그램 설정을 변경하지 않습니다.":"Startup settings cannot be changed on the preview server.",
 "시작프로그램 설정을 변경할 수 없습니다.":"Unable to change startup settings.",
 "AutoShine 실행 파일을 찾을 수 없습니다.":"The AutoShine executable could not be found.",
